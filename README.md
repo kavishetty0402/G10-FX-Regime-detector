@@ -75,4 +75,4 @@ This is an analytical tool for research purposes, not investment advice.
 
 ---
 
-*Built by Kavish Shetty — August 2026*
+*Built by Kavish Shetty*
