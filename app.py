@@ -207,7 +207,8 @@ def download_fx_monthly(start_date: str, end_date: str) -> pd.DataFrame:
     ticker_to_name = {v: k for k, v in FX_PAIRS.items()}
     close.columns = [ticker_to_name.get(c, c) for c in close.columns]
     return close.resample("ME").last().dropna()
-
+    monthly.index = monthly.index.to_period("M").to_timestamp()
+    return monthly
 
 # ─────────────────────────────────────────────────────────────
 # MODEL FUNCTIONS
