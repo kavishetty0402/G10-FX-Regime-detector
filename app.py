@@ -173,9 +173,9 @@ def compute_features(data: pd.DataFrame, lookback: int = 21) -> pd.DataFrame:
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def fit_hmm(
-    _features_values: np.ndarray,
-    _features_index: tuple,
-    _features_columns: tuple,
+    features_values: np.ndarray,
+    features_index: tuple,
+    features_columns: tuple,
     n_regimes: int = 3,
     random_state: int = 42,
 ) -> tuple:
@@ -191,9 +191,9 @@ def fit_hmm(
     probs       : array of regime probabilities per date (n_dates × n_regimes)
     """
     features = pd.DataFrame(
-        _features_values,
-        index=pd.DatetimeIndex(_features_index),
-        columns=list(_features_columns),
+        features_values,
+        index=pd.DatetimeIndex(features_index),
+        columns=list(features_columns),
     )
     feat_mean = features.mean()
     feat_std = features.std()
@@ -481,9 +481,9 @@ def main():
     with st.spinner("Fitting Hidden Markov Model..."):
         try:
             transmat, hmm_means, states, probs = fit_hmm(
-                _features_values=features.values,
-                _features_index=tuple(features.index),
-                _features_columns=tuple(features.columns),
+                features_values=features.values,
+                features_index=tuple(features.index),
+                features_columns=tuple(features.columns),
                 n_regimes=n_regimes,
             )
         except Exception as e:
@@ -616,6 +616,46 @@ def main():
             margin=dict(l=60, r=60, t=40, b=40),
         )
         st.plotly_chart(fig_radar, width='stretch')
+
+        # Per-regime correlation matrices
+        st.markdown("#### Feature Correlations by Regime")
+        st.caption(
+            "Cross-asset correlations shift across regimes — relationships that "
+            "hold in calm markets can break down or reverse in stress.  Compare "
+            "matrices to see which co-movements are regime-dependent."
+        )
+
+        features_labelled = features.copy()
+        features_labelled["_regime"] = [label_map[s] for s in states]
+
+        corr_cols = st.columns(n_regimes)
+        order = REGIME_LABEL_SETS[n_regimes]
+        for idx, regime in enumerate([r for r in order if r in label_map.values()]):
+            with corr_cols[idx]:
+                st.markdown(f"**{regime}**")
+                subset = features_labelled[features_labelled["_regime"] == regime]
+                corr = subset.drop(columns=["_regime"]).rename(
+                    columns=FEATURE_NAMES
+                ).corr().round(2)
+
+                # Heatmap
+                fig_corr = go.Figure(data=go.Heatmap(
+                    z=corr.values,
+                    x=[c.split(" ")[0] for c in corr.columns],  # short labels
+                    y=[c.split(" ")[0] for c in corr.columns],
+                    colorscale="RdBu_r",
+                    zmin=-1, zmax=1,
+                    text=corr.values,
+                    texttemplate="%{text:.1f}",
+                    textfont=dict(size=9),
+                    showscale=idx == n_regimes - 1,  # legend on last only
+                ))
+                fig_corr.update_layout(
+                    height=320,
+                    margin=dict(l=10, r=10, t=10, b=10),
+                    xaxis=dict(tickangle=45),
+                )
+                st.plotly_chart(fig_corr, width='stretch')
 
     # ── Tab 3: FX performance ──
     with tab3:
