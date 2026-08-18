@@ -5,7 +5,7 @@ Uses a Gaussian Hidden Markov Model (HMM) to classify the macro environment
 into distinct regimes based on observable market indicators, then shows
 which G10 FX trades have historically outperformed in each regime.
 
-Built by Kavish Shetty | August 2026
+Built by Kavish Shetty
 """
 
 import streamlit as st
