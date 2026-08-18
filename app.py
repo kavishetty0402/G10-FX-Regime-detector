@@ -543,7 +543,7 @@ def main():
                             showlegend=True,
                         )
                     )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
         else:
             st.warning(f"No data for {overlay_pair}.")
 
@@ -572,7 +572,7 @@ def main():
             yaxis=dict(range=[0, 1]),
             legend=dict(orientation="h", yanchor="bottom", y=1.02),
         )
-        st.plotly_chart(fig_prob, use_container_width=True)
+        st.plotly_chart(fig_prob, width='stretch')
 
     # ── Tab 2: Regime characteristics ──
     with tab2:
@@ -580,7 +580,7 @@ def main():
         char_table = regime_characteristics_table(
             features, states, label_map, n_regimes
         )
-        st.dataframe(char_table, use_container_width=True)
+        st.dataframe(char_table, width='stretch')
 
         # Radar chart of regime profiles
         st.markdown("#### Regime Fingerprints")
@@ -615,7 +615,7 @@ def main():
             height=450,
             margin=dict(l=60, r=60, t=40, b=40),
         )
-        st.plotly_chart(fig_radar, use_container_width=True)
+        st.plotly_chart(fig_radar, width='stretch')
 
     # ── Tab 3: FX performance ──
     with tab3:
@@ -631,8 +631,8 @@ def main():
                 fx_ret, features, states, label_map, n_regimes
             )
             st.dataframe(
-                perf.style.background_gradient(cmap="RdYlGn", axis=None),
-                use_container_width=True,
+                perf,
+                width='stretch',
             )
 
             # Bar chart
@@ -654,7 +654,7 @@ def main():
                 title="G10 FX Returns by Regime",
                 legend=dict(orientation="h", yanchor="bottom", y=1.02),
             )
-            st.plotly_chart(fig_bar, use_container_width=True)
+            st.plotly_chart(fig_bar, width='stretch')
         else:
             st.warning("Insufficient data for forward returns.")
 
@@ -667,15 +667,15 @@ def main():
         )
         trans = transition_matrix(transmat, label_map, n_regimes)
         st.dataframe(
-            trans.style.background_gradient(cmap="Blues", axis=None),
-            use_container_width=True,
+            trans,
+            width='stretch',
         )
 
         st.markdown("#### Regime Duration Statistics")
         dur = regime_duration_stats(states, label_map, features.index)
         order = REGIME_LABEL_SETS[n_regimes]
         dur = dur.reindex([o for o in order if o in dur.index])
-        st.dataframe(dur, use_container_width=True)
+        st.dataframe(dur, width='stretch')
 
     # ── Footer ──
     st.markdown("---")
